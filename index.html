@@ -146,32 +146,32 @@
 </div>
 
 <script>
-    // Lista de mapeamento com fallback (tenta com o código CIE e sem o código)
-    const LISTA_ESCOLAS = [
-        { nome: "ABILIO RAPOSO FERRAZ JUNIOR", codigo: "24545" },
-        { nome: "ASSENTAMENTO ZUMBI DOS PALMARES", codigo: "923983" },
-        { nome: "AVELINO APARECIDO RIBEIRO DOUTOR", codigo: "24697" },
-        { nome: "BENE ANDRADE DONA", codigo: "24533" },
-        { nome: "CELSO FERREIRA DA SILVA PROFESSOR", codigo: "920519" },
-        { nome: "COTA LEONEL DONA", codigo: "24654" },
-        { nome: "DIMAS MOZART E SILVA PROFESSOR", codigo: "906230" },
-        { nome: "EMILIO IMMOOS PADRE", codigo: "24624" },
-        { nome: "ERUCE PAULUCCI PROFESSOR", codigo: "24582" },
-        { nome: "GUIDO DIAS DE ALMEIDA PROFESSOR", codigo: "910119" },
-        { nome: "JOAO CRUZ CORONEL", codigo: "24514" },
-        { nome: "JOAO MICHELIN", codigo: "24703" },
-        { nome: "JOAO TEIXEIRA DE ARAUJO PROFESSOR", codigo: "24648" },
-        { nome: "JOSE APARECIDO CASTELUCCI PROFESSOR", codigo: "24673" },
-        { nome: "JOSE LEITE PINHEIRO PROFESSOR", codigo: "24600" },
-        { nome: "JOSE PENNA", codigo: "24612" },
-        { nome: "JOSE PIRES DE CARVALHO DOUTOR", codigo: "24715" },
-        { nome: "MARIA IZABEL CRUZ PIMENTEL DONA", codigo: "24521" },
-        { nome: "MATILDE VIEIRA", codigo: "24508" },
-        { nome: "PAULO ARAUJO NOVAES DOUTOR", codigo: "24557" },
-        { nome: "PAULO DELICIO", codigo: "24727" },
-        { nome: "PEDRO BENTO ALVES", codigo: "24661" },
-        { nome: "PROFESSORA MARIANA APARECIDA TODESCATO", codigo: "924847" },
-        { nome: "SANDRA APARECIDA DE ARAUJO PROFESSORA", codigo: "44671" }
+    // Lista exata com os nomes dos arquivos na pasta dados/
+    const ARQUIVOS_REDE = [
+        "ABILIO RAPOSO FERRAZ JUNIOR - 903188.xlsx",
+        "ASSENTAMENTO ZUMBI DOS PALMARES - 566032.xlsx",
+        "AVELINO APARECIDO RIBEIRO DOUTOR - 14552.xlsx",
+        "BENE ANDRADE DONA - 14631.xlsx",
+        "CELSO FERREIRA DA SILVA PROFESSOR - 918489.xlsx",
+        "COTA LEONEL DONA - 905185.xlsx",
+        "DIMAS MOZART E SILVA PROFESSOR - 900424.xlsx",
+        "EMILIO IMMOOS PADRE - 45226.xlsx",
+        "ERUCE PAULUCCI PROFESSOR - 914484.xlsx",
+        "GUIDO DIAS DE ALMEIDA PROFESSOR - 910119.xlsx",
+        "JOAO CRUZ CORONEL - 14497.xlsx",
+        "JOAO MICHELIN - 14485.xlsx",
+        "JOAO TEIXEIRA DE ARAUJO PROFESSOR - 14588.xlsx",
+        "JOSE APARECIDO CASTELUCCI PROFESSOR - 49888.xlsx",
+        "JOSE LEITE PINHEIRO PROFESSOR - 14527.xlsx",
+        "JOSE PENNA - 14540.xlsx",
+        "JOSE PIRES DE CARVALHO DOUTOR - 924088.xlsx",
+        "MARIA IZABEL CRUZ PIMENTEL DONA - 38908.xlsx",
+        "MATILDE VIEIRA - 14679.xlsx",
+        "PAULO ARAUJO NOVAES DOUTOR - 14461.xlsx",
+        "PAULO DELICIO - 14515.xlsx",
+        "PEDRO BENTO ALVES - 14503.xlsx",
+        "PROFESSORA MARIANA APARECIDA TODESCATO - 191516.xlsx",
+        "SANDRA APARECIDA DE ARAUJO PROFESSORA - 924337.xlsx"
     ];
 
     const DISCIPLINAS_PADRAO = [
@@ -189,6 +189,10 @@
     let currentSortDir = 'desc';  
     let currentData = [];         
     let totaisGlobais = {}; 
+
+    function extrairNomeEscola(nomeArquivo) {
+        return nomeArquivo.replace(/\.xlsx$/i, '').replace(/\s*-\s*\d+$/, '').trim();
+    }
 
     window.onload = async () => {
         if (window.location.protocol === 'file:') {
@@ -217,7 +221,7 @@
         } catch (e) {
             document.getElementById('loadingSpinner').style.display = 'none';
             document.getElementById('loadingText').innerText = "Erro ao consolidar as planilhas";
-            document.getElementById('loadingSubtext').innerText = e.message || "Verifique o console (F12) para detalhes.";
+            document.getElementById('loadingSubtext').innerText = e.message || "Verifique se a pasta dados/ está no mesmo nível do index.html.";
             console.error(e);
         }
     };
@@ -231,7 +235,6 @@
     function parseValorNumerico(val) {
         if (val === null || val === undefined || val === "" || val === "-") return -1;
         if (typeof val === 'number') {
-            // Se vier decimal como 0.551361 (frequente no Excel), converte para 55.1361
             return val <= 1.0 && val > 0 ? val * 100 : val;
         }
         let str = String(val).replace('%', '').replace(',', '.').trim();
@@ -262,17 +265,15 @@
         turmasGlobais = [];
         dadosEscolasCache = {};
 
-        for (let i = 0; i < LISTA_ESCOLAS.length; i++) {
-            const item = LISTA_ESCOLAS[i];
-            const nomeEscola = item.nome;
-            document.getElementById('loadingSubtext').innerText = `Lendo: ${nomeEscola} (${i + 1}/${LISTA_ESCOLAS.length})`;
+        for (let i = 0; i < ARQUIVOS_REDE.length; i++) {
+            const nomeArquivo = ARQUIVOS_REDE[i];
+            const nomeEscola = extrairNomeEscola(nomeArquivo);
+            document.getElementById('loadingSubtext').innerText = `Processando: ${nomeEscola} (${i + 1}/${ARQUIVOS_REDE.length})`;
 
             let buffer = null;
             const tentativas = [
-                `dados/${nomeEscola} - ${item.codigo}.xlsx`,
-                `dados/${nomeEscola}.xlsx`,
-                `dados/${nomeEscola} - ${item.codigo}.XLSX`,
-                `dados/${nomeEscola}.XLSX`
+                `dados/${nomeArquivo}`,
+                `dados/${nomeEscola}.xlsx`
             ];
 
             for (let url of tentativas) {
@@ -282,18 +283,20 @@
                 } catch(e) {}
             }
 
-            if (!buffer) continue;
+            if (!buffer) {
+                console.warn(`Arquivo não encontrado para: ${nomeArquivo}`);
+                continue;
+            }
 
             try {
                 const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
                 
-                // 1º Prioridade: Aba 'Resultado automático' já consolidada
+                // Prioridade: Aba 'Resultado automático' já compilada
                 const abaResultadoNome = workbook.SheetNames.find(s => s.toLowerCase().includes('resultado'));
                 
                 if (abaResultadoNome) {
                     const sheet = workbook.Sheets[abaResultadoNome];
                     const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-                    
                     let turmasEscola = [];
 
                     rows.forEach(r => {
