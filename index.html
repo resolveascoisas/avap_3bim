@@ -34,15 +34,15 @@
         .btn-print:hover { background-color: var(--primary); }
 
         .controls { display: flex; gap: 20px; margin-bottom: 20px; align-items: flex-end; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); flex-wrap: wrap;}
-        .controls select { padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: 'Inter'; font-size: 14px; min-width: 200px; outline: none; cursor: pointer; }
+        .controls select { padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: 'Inter'; font-size: 14px; min-width: 220px; outline: none; cursor: pointer; }
         .controls label { font-weight: 600; font-size: 13px; display: block; margin-bottom: 5px; color: var(--secondary); }
 
         .table-wrapper { overflow-x: auto; margin-bottom: 30px; border-radius: 8px; border: 1px solid var(--border); }
-        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 1050px;}
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 1100px;}
         
-        .data-table th, .data-table td { border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); padding: 8px 3px; text-align: center; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .data-table th, .data-table td { border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); padding: 8px 4px; text-align: center; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         
-        .data-table thead th { background: var(--primary); color: white; font-weight: 600; padding: 12px 3px; white-space: normal; cursor: pointer; user-select: none; transition: background 0.2s; }
+        .data-table thead th { background: var(--primary); color: white; font-weight: 600; padding: 12px 4px; white-space: normal; cursor: pointer; user-select: none; transition: background 0.2s; }
         .data-table thead th:hover { background: #1e293b; }
         .sort-icon { display: inline-block; margin-left: 3px; font-size: 10px; color: #94a3b8; }
         .th-active { background: var(--accent) !important; }
@@ -57,17 +57,17 @@
         .cell-yellow { background-color: var(--yellow-vivid) !important; color: var(--yellow-text) !important; font-weight: 700; }
         .cell-green { background-color: var(--green-vivid) !important; color: var(--green-text) !important; font-weight: 700; }
         .cell-blue { background: var(--blue-bg) !important; color: var(--blue-text) !important; font-weight: 700; }
-        .cell-empty { background: #f8fafc; color: #cbd5e1; }
+        .cell-empty { background: #f8fafc; color: #94a3b8; }
 
         .interactive-cell { cursor: pointer; transition: transform 0.1s; }
         .interactive-cell:hover { filter: brightness(0.9); transform: scale(0.98); }
         .rank-text { font-size: 10.5px; font-weight: 600; line-height: 1.2; }
 
-        .chart-container { position: relative; height: 400px; width: 100%; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .chart-container { position: relative; height: 420px; width: 100%; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
 
         #loadingOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.95); z-index: 1000; display: flex; flex-direction: column;
+            background: rgba(255,255,255,0.96); z-index: 1000; display: flex; flex-direction: column;
             justify-content: center; align-items: center; font-size: 18px; font-weight: 600; color: var(--primary); text-align: center;
         }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
@@ -93,7 +93,7 @@
 <div id="loadingOverlay">
     <div class="spinner" id="loadingSpinner"></div>
     <div id="loadingText">Sincronizando Base de Dados (3º Bimestre)...</div>
-    <div id="loadingSubtext" style="font-size: 13px; font-weight: 400; color: var(--secondary); margin-top: 10px; max-width: 600px;">Aguarde, conectando com as escolas da URE Avaré.</div>
+    <div id="loadingSubtext" style="font-size: 13px; font-weight: 400; color: var(--secondary); margin-top: 10px; max-width: 600px;">Aguarde, processando arquivos da URE Avaré.</div>
 </div>
 
 <div class="dashboard-container">
@@ -102,7 +102,7 @@
             <img src="imagens/logo-ure-avare-site.png" alt="Logo URE Avaré" class="logo-img no-print" onerror="this.style.display='none'">
             <div class="header-text">
                 <h1>Dashboard Avaliação Processual - 3º Bimestre</h1>
-                <p>Análise Regional de Desempenho - <b>Dica: Clique sobre a % para ver a colocação no mesmo ano/série!</b></p>
+                <p>Análise Regional de Desempenho - <b>Dica: Clique sobre a % para alternar entre Percentual e Posição no Rank!</b></p>
             </div>
         </div>
         <button class="tab-btn btn-print no-print" onclick="window.print()">🖨️ Imprimir (Paisagem)</button>
@@ -146,41 +146,42 @@
 </div>
 
 <script>
-    const CONFIG = {
-        // Nomes exatos das escolas que dão nome aos arquivos .xlsx dentro de dados/
-        ESCOLAS: [
-            "ABILIO RAPOSO FERRAZ JUNIOR",
-            "ASSENTAMENTO ZUMBI DOS PALMARES",
-            "AVELINO APARECIDO RIBEIRO DOUTOR",
-            "BENE ANDRADE DONA",
-            "CELSO FERREIRA DA SILVA PROFESSOR",
-            "COTA LEONEL DONA",
-            "DIMAS MOZART E SILVA PROFESSOR",
-            "EMILIO IMMOOS PADRE",
-            "ERUCE PAULUCCI PROFESSOR",
-            "GUIDO DIAS DE ALMEIDA PROFESSOR",
-            "JOAO CRUZ CORONEL",
-            "JOAO MICHELIN",
-            "JOAO TEIXEIRA DE ARAUJO PROFESSOR",
-            "JOSE APARECIDO CASTELUCCI PROFESSOR",
-            "JOSE LEITE PINHEIRO PROFESSOR",
-            "JOSE PENNA",
-            "JOSE PIRES DE CARVALHO DOUTOR",
-            "MARIA IZABEL CRUZ PIMENTEL DONA",
-            "MATILDE VIEIRA",
-            "PAULO ARAUJO NOVAES DOUTOR",
-            "PAULO DELICIO",
-            "PEDRO BENTO ALVES",
-            "PROFESSORA MARIANA APARECIDA TODESCATO",
-            "SANDRA APARECIDA DE ARAUJO PROFESSORA"
-        ]
-    };
+    // Lista de mapeamento com fallback (tenta com o código CIE e sem o código)
+    const LISTA_ESCOLAS = [
+        { nome: "ABILIO RAPOSO FERRAZ JUNIOR", codigo: "24545" },
+        { nome: "ASSENTAMENTO ZUMBI DOS PALMARES", codigo: "923983" },
+        { nome: "AVELINO APARECIDO RIBEIRO DOUTOR", codigo: "24697" },
+        { nome: "BENE ANDRADE DONA", codigo: "24533" },
+        { nome: "CELSO FERREIRA DA SILVA PROFESSOR", codigo: "920519" },
+        { nome: "COTA LEONEL DONA", codigo: "24654" },
+        { nome: "DIMAS MOZART E SILVA PROFESSOR", codigo: "906230" },
+        { nome: "EMILIO IMMOOS PADRE", codigo: "24624" },
+        { nome: "ERUCE PAULUCCI PROFESSOR", codigo: "24582" },
+        { nome: "GUIDO DIAS DE ALMEIDA PROFESSOR", codigo: "910119" },
+        { nome: "JOAO CRUZ CORONEL", codigo: "24514" },
+        { nome: "JOAO MICHELIN", codigo: "24703" },
+        { nome: "JOAO TEIXEIRA DE ARAUJO PROFESSOR", codigo: "24648" },
+        { nome: "JOSE APARECIDO CASTELUCCI PROFESSOR", codigo: "24673" },
+        { nome: "JOSE LEITE PINHEIRO PROFESSOR", codigo: "24600" },
+        { nome: "JOSE PENNA", codigo: "24612" },
+        { nome: "JOSE PIRES DE CARVALHO DOUTOR", codigo: "24715" },
+        { nome: "MARIA IZABEL CRUZ PIMENTEL DONA", codigo: "24521" },
+        { nome: "MATILDE VIEIRA", codigo: "24508" },
+        { nome: "PAULO ARAUJO NOVAES DOUTOR", codigo: "24557" },
+        { nome: "PAULO DELICIO", codigo: "24727" },
+        { nome: "PEDRO BENTO ALVES", codigo: "24661" },
+        { nome: "PROFESSORA MARIANA APARECIDA TODESCATO", codigo: "924847" },
+        { nome: "SANDRA APARECIDA DE ARAUJO PROFESSORA", codigo: "44671" }
+    ];
+
+    const DISCIPLINAS_PADRAO = [
+        "Biologia", "Ciências", "Filosofia", "Sociologia", "Física",
+        "Geografia", "História", "Língua Inglesa", "Língua Portuguesa",
+        "Matemática", "Química"
+    ];
 
     let dadosEscolasCache = {}; 
-    let disciplinasGlobais = new Set();
-    
-    let rankingGlobaisEscolas = [];
-    let rankingGlobaisTurmas = [];
+    let turmasGlobais = [];
     
     let modoAtual = 'GERAL';
     let chartInstance = null;
@@ -193,93 +194,50 @@
         if (window.location.protocol === 'file:') {
             document.getElementById('loadingSpinner').style.display = 'none';
             document.getElementById('loadingText').innerText = "Acesso Local Bloqueado pelo Navegador";
-            document.getElementById('loadingSubtext').innerHTML = "<span style='color:#dc2626; font-weight:bold;'>Erro:</span> Você abriu o arquivo index.html dando dois cliques no computador.<br>Para o painel rodar com segurança, você <b>precisa subir esta pasta para o GitHub Pages</b> ou usar um Servidor Local (Live Server / Python).";
+            document.getElementById('loadingSubtext').innerHTML = "<span style='color:#dc2626; font-weight:bold;'>Erro:</span> Arquivo aberto por duplo-clique.<br>Suba para o GitHub Pages ou abra com um servidor local (Live Server no VS Code).";
             return;
         }
 
         try {
-            await carregarTodasPlanilhasExcel();
-            preCalcularTodosRankings();
+            await carregarTodasPlanilhas();
+            
+            const escolasLidas = Object.keys(dadosEscolasCache);
+            if (escolasLidas.length === 0) {
+                throw new Error("Nenhuma planilha válida pôde ser carregada da pasta dados/.");
+            }
 
             const select = document.getElementById('escolaSelect');
             select.innerHTML = "";
-            CONFIG.ESCOLAS.forEach(nome => {
-                if (dadosEscolasCache[nome]) {
-                    select.innerHTML += `<option value="${nome}">${nome}</option>`;
-                }
+            escolasLidas.sort().forEach(nome => {
+                select.innerHTML += `<option value="${nome}">${nome}</option>`;
             });
 
             document.getElementById('loadingOverlay').style.display = 'none';
             setModo('GERAL');
         } catch (e) {
             document.getElementById('loadingSpinner').style.display = 'none';
-            document.getElementById('loadingText').innerText = "Erro Crítico ao carregar dados";
-            document.getElementById('loadingSubtext').innerText = "Abra o console (F12) para ver detalhes. Certifique-se de que os nomes dos arquivos Excel na pasta dados/ batem com a lista.";
+            document.getElementById('loadingText').innerText = "Erro ao consolidar as planilhas";
+            document.getElementById('loadingSubtext').innerText = e.message || "Verifique o console (F12) para detalhes.";
             console.error(e);
         }
     };
 
     async function fetchAsArrayBuffer(url) {
         const resp = await fetch(encodeURI(url));
-        if (!resp.ok) throw new Error(`Arquivo não encontrado: ${url}`);
+        if (!resp.ok) throw new Error(`404: ${url}`);
         return await resp.arrayBuffer();
     }
 
-    // Calcula quantidade de questões pela string do cabeçalho (ex: "(Questões 1, 2, 3, 4)" -> 4)
-    function calcularQtdQuestoes(headerString) {
-        const match = headerString.match(/\((Questões.*?)\)/i);
-        if (match) {
-            const numeros = match[1].match(/\d+/g);
-            return numeros ? numeros.length : 4;
+    function parseValorNumerico(val) {
+        if (val === null || val === undefined || val === "" || val === "-") return -1;
+        if (typeof val === 'number') {
+            // Se vier decimal como 0.551361 (frequente no Excel), converte para 55.1361
+            return val <= 1.0 && val > 0 ? val * 100 : val;
         }
-        return 4;
-    }
-
-    async function carregarTodasPlanilhasExcel() {
-        for (let i = 0; i < CONFIG.ESCOLAS.length; i++) {
-            const nomeEscola = CONFIG.ESCOLAS[i];
-            const url = `dados/${nomeEscola}.xlsx`;
-            document.getElementById('loadingSubtext').innerText = `Processando: ${nomeEscola} (${i + 1}/${CONFIG.ESCOLAS.length})`;
-            
-            try {
-                let buffer;
-                try {
-                    buffer = await fetchAsArrayBuffer(url);
-                } catch (err) {
-                    // Fallback caso algum arquivo venha com espaço extra ou extensão minúscula
-                    buffer = await fetchAsArrayBuffer(`dados/${nomeEscola.trim()}.xlsx`);
-                }
-
-                const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
-                let turmasData = [];
-                
-                workbook.SheetNames.forEach(sheetName => {
-                    // Ignora aba automática de resumo se houver
-                    if (sheetName.toLowerCase().includes('resultado')) return;
-                    
-                    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
-                    if (sheetData.length === 0) return;
-                    
-                    const classCol = Object.keys(sheetData[0])[0];
-                    sheetData.forEach(row => {
-                        let turmaVal = row[classCol];
-                        if (turmaVal && String(turmaVal).trim() !== "" && !String(turmaVal).toUpperCase().includes("MÉDIA")) {
-                            turmasData.push(row);
-                            Object.keys(row).forEach(h => {
-                                if (h.includes("Acertos em")) {
-                                    const match = h.match(/Acertos em (.*?)\s*\(/);
-                                    if (match) disciplinasGlobais.add(match[1].trim());
-                                }
-                            });
-                        }
-                    });
-                });
-                
-                if (turmasData.length > 0) dadosEscolasCache[nomeEscola] = turmasData;
-            } catch(e) { 
-                console.warn(`Aviso: Planilha de "${nomeEscola}" não encontrada em dados/${nomeEscola}.xlsx`); 
-            }
-        }
+        let str = String(val).replace('%', '').replace(',', '.').trim();
+        let num = parseFloat(str);
+        if (isNaN(num)) return -1;
+        return num <= 1.0 && num > 0 ? num * 100 : num;
     }
 
     function classificarEtapa(turma) {
@@ -300,125 +258,285 @@
         return "OUTROS";
     }
 
-    function preCalcularTodosRankings() {
-        const discArray = Array.from(disciplinasGlobais).sort();
-        
-        rankingGlobaisTurmas = [];
-        rankingGlobaisEscolas = [];
+    async function carregarTodasPlanilhas() {
+        turmasGlobais = [];
+        dadosEscolasCache = {};
+
+        for (let i = 0; i < LISTA_ESCOLAS.length; i++) {
+            const item = LISTA_ESCOLAS[i];
+            const nomeEscola = item.nome;
+            document.getElementById('loadingSubtext').innerText = `Lendo: ${nomeEscola} (${i + 1}/${LISTA_ESCOLAS.length})`;
+
+            let buffer = null;
+            const tentativas = [
+                `dados/${nomeEscola} - ${item.codigo}.xlsx`,
+                `dados/${nomeEscola}.xlsx`,
+                `dados/${nomeEscola} - ${item.codigo}.XLSX`,
+                `dados/${nomeEscola}.XLSX`
+            ];
+
+            for (let url of tentativas) {
+                try {
+                    buffer = await fetchAsArrayBuffer(url);
+                    if (buffer) break;
+                } catch(e) {}
+            }
+
+            if (!buffer) continue;
+
+            try {
+                const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+                
+                // 1º Prioridade: Aba 'Resultado automático' já consolidada
+                const abaResultadoNome = workbook.SheetNames.find(s => s.toLowerCase().includes('resultado'));
+                
+                if (abaResultadoNome) {
+                    const sheet = workbook.Sheets[abaResultadoNome];
+                    const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+                    
+                    let turmasEscola = [];
+
+                    rows.forEach(r => {
+                        const keys = Object.keys(r);
+                        if (keys.length === 0) return;
+                        
+                        let tNome = String(r[keys[0]]).trim();
+                        if (!tNome || tNome.toUpperCase().includes("MÉDIA GLOBAL")) return;
+
+                        let pres = parseInt(r["Alunos (Pres.)"] || r["Alunos que fizeram a avaliação"]) || 0;
+                        let mat = parseInt(r["Total Matric."] || r["Total de Matrículas"]) || pres;
+                        let part = parseValorNumerico(r["Part. (%)"] || r["Participação"]);
+                        if (part === -1 && mat > 0) part = (pres / mat) * 100;
+
+                        let disc = {};
+                        DISCIPLINAS_PADRAO.forEach(d => {
+                            let matchKey = keys.find(k => k.trim().toLowerCase() === d.toLowerCase());
+                            disc[d] = matchKey ? parseValorNumerico(r[matchKey]) : -1;
+                        });
+
+                        let mg = parseValorNumerico(r["Média Geral"] || r["Media Geral"]);
+
+                        let turmaObj = {
+                            escola: nomeEscola,
+                            turma: tNome,
+                            nome: tNome,
+                            anoSerie: extrairAnoSerie(tNome),
+                            turno: tNome.toUpperCase().includes('INTEGRAL') ? 'INTEGRAL' : 'PARCIAL',
+                            etapa: classificarEtapa(tNome),
+                            pres: pres,
+                            matrics: mat,
+                            pctPart: part > -1 ? part : 100,
+                            mediaGeral: mg,
+                            disc: disc
+                        };
+
+                        turmasEscola.push(turmaObj);
+                        turmasGlobais.push(turmaObj);
+                    });
+
+                    if (turmasEscola.length > 0) {
+                        dadosEscolasCache[nomeEscola] = turmasEscola;
+                    }
+                }
+            } catch (errParse) {
+                console.warn(`Erro ao interpretar planilha de ${nomeEscola}:`, errParse);
+            }
+        }
+    }
+
+    function filtrarTurmas() {
+        let fEtapa = document.getElementById('etapaSelect').value;
+        let fTurno = document.getElementById('turnoSelect').value;
+
+        return turmasGlobais.filter(t => {
+            if (fTurno !== 'TODOS' && t.turno !== fTurno) return false;
+            if (fEtapa === 'EFAF' && t.etapa !== 'EFAF') return false;
+            if (fEtapa === 'EM_TODOS' && !t.etapa.startsWith('EM')) return false;
+            if (fEtapa === 'EM_PROPEDEUTICO' && t.etapa !== 'EM_PROPEDEUTICO') return false;
+            if (fEtapa === 'EM_TECNICO' && t.etapa !== 'EM_TECNICO') return false;
+            return true;
+        });
+    }
+
+    function processarDadosGeral() {
+        currentData = [];
+        let turmasFiltradas = filtrarTurmas();
+
+        let globAlunos = 0, globMatriculas = 0;
+        let globDiscSoma = {}, globDiscQtd = {};
+        let mediaGeralSoma = 0, mediaGeralQtd = 0;
+
+        DISCIPLINAS_PADRAO.forEach(d => {
+            globDiscSoma[d] = 0;
+            globDiscQtd[d] = 0;
+        });
 
         Object.keys(dadosEscolasCache).forEach(escola => {
-            let turmasMap = {};
-            dadosEscolasCache[escola].forEach(row => {
-                const keys = Object.keys(row);
-                const tNome = String(row[keys[0]]).toUpperCase().trim();
+            let turmasEscola = turmasFiltradas.filter(t => t.escola === escola);
+            if (turmasEscola.length === 0) return;
+
+            let pres = 0, mat = 0;
+            let discSoma = {}, discQtd = {};
+            let mgSoma = 0, mgQtd = 0;
+
+            DISCIPLINAS_PADRAO.forEach(d => {
+                discSoma[d] = 0;
+                discQtd[d] = 0;
+            });
+
+            turmasEscola.forEach(t => {
+                pres += t.pres;
+                mat += t.matrics;
                 
-                // Pega alunos presentes e matrículas diretamente da planilha
-                let keyPres = keys.find(k => k.toLowerCase().includes("fizeram") || k.toLowerCase().includes("pres"));
-                let keyMat = keys.find(k => k.toLowerCase().includes("matrícula") || k.toLowerCase().includes("matricula") || k.toLowerCase().includes("total de alunos"));
-                
-                const pres = parseInt(row[keyPres]) || 0;
-                const mat = parseInt(row[keyMat]) || pres;
-                
-                if (!turmasMap[tNome]) {
-                    turmasMap[tNome] = { 
-                        escola: escola, 
-                        turma: tNome, 
-                        anoSerie: extrairAnoSerie(tNome),
-                        turno: tNome.includes('INTEGRAL') ? 'INTEGRAL' : 'PARCIAL',
-                        etapa: classificarEtapa(tNome),
-                        pres: pres, 
-                        matrics: mat,
-                        acertos: 0, 
-                        possiveis: 0, 
-                        disc: {} 
-                    };
-                    discArray.forEach(d => turmasMap[tNome].disc[d] = { acertos: 0, possiveis: 0, pct: -1 });
+                if (t.mediaGeral > -1) {
+                    mgSoma += (t.mediaGeral * t.pres);
+                    mgQtd += t.pres;
                 }
-                
-                Object.keys(row).forEach(h => {
-                    if (h.includes("Acertos em")) {
-                        const match = h.match(/Acertos em (.*?)\s*\(/);
-                        if (match) {
-                            const dNome = match[1].trim();
-                            const valStr = row[h];
-                            if (valStr !== "" && valStr !== "-") {
-                                const acertos = parseInt(valStr) || 0;
-                                const possiveis = pres * calcularQtdQuestoes(h);
-                                if (turmasMap[tNome].disc[dNome]) {
-                                    turmasMap[tNome].disc[dNome].acertos += acertos;
-                                    turmasMap[tNome].disc[dNome].possiveis += possiveis;
-                                }
-                                turmasMap[tNome].acertos += acertos;
-                                turmasMap[tNome].possiveis += possiveis;
-                            }
-                        }
+
+                DISCIPLINAS_PADRAO.forEach(d => {
+                    if (t.disc[d] > -1) {
+                        discSoma[d] += (t.disc[d] * t.pres);
+                        discQtd[d] += t.pres;
                     }
                 });
             });
 
-            // Conclui turmas da escola
-            Object.keys(turmasMap).forEach(tNome => {
-                let t = turmasMap[tNome];
-                t.pctPart = t.matrics > 0 ? Math.min((t.pres / t.matrics) * 100, 100) : 100;
-                t.mediaGeral = t.possiveis > 0 ? (t.acertos / t.possiveis) * 100 : -1;
-                discArray.forEach(d => { 
-                    if (t.disc[d].possiveis > 0) t.disc[d].pct = (t.disc[d].acertos / t.disc[d].possiveis) * 100; 
-                });
-                
-                rankingGlobaisTurmas.push(t);
+            let escDisc = {};
+            DISCIPLINAS_PADRAO.forEach(d => {
+                let pct = discQtd[d] > 0 ? (discSoma[d] / discQtd[d]) : -1;
+                escDisc[d] = pct;
+                if (pct > -1) {
+                    globDiscSoma[d] += discSoma[d];
+                    globDiscQtd[d] += discQtd[d];
+                }
+            });
+
+            let pctPart = mat > 0 ? Math.min((pres / mat) * 100, 100) : 100;
+            let mediaGeral = mgQtd > 0 ? (mgSoma / mgQtd) : -1;
+
+            if (mediaGeral > -1) {
+                mediaGeralSoma += mgSoma;
+                mediaGeralQtd += mgQtd;
+            }
+
+            globAlunos += pres;
+            globMatriculas += mat;
+
+            currentData.push({
+                nome: escola,
+                pres: pres,
+                matrics: mat,
+                pctPart: pctPart,
+                mediaGeral: mediaGeral,
+                disc: escDisc
             });
         });
 
-        // Consolida visão geral das escolas
-        Object.keys(dadosEscolasCache).forEach(escola => {
-            let e = { nome: escola, pres: 0, matrics: 0, acertos: 0, possiveis: 0, disc: {} };
-            discArray.forEach(d => e.disc[d] = { acertos: 0, possiveis: 0, pct: -1 });
+        let globDisc = {};
+        DISCIPLINAS_PADRAO.forEach(d => {
+            globDisc[d] = globDiscQtd[d] > 0 ? (globDiscSoma[d] / globDiscQtd[d]) : -1;
+        });
+
+        totaisGlobais = {
+            globAlunos,
+            globMatriculas,
+            globPart: globMatriculas > 0 ? Math.min((globAlunos / globMatriculas) * 100, 100) : 0,
+            globMedia: mediaGeralQtd > 0 ? (mediaGeralSoma / mediaGeralQtd) : -1,
+            globDisc
+        };
+
+        renderizarTabelaEGratico();
+    }
+
+    function processarDadosEscola() {
+        const nomeEscola = document.getElementById('escolaSelect').value;
+        if (!nomeEscola) return;
+
+        let turmasFiltradas = filtrarTurmas().filter(t => t.escola === nomeEscola);
+        currentData = turmasFiltradas;
+
+        let globAlunos = 0, globMatriculas = 0;
+        let globDiscSoma = {}, globDiscQtd = {};
+        let mediaGeralSoma = 0, mediaGeralQtd = 0;
+
+        DISCIPLINAS_PADRAO.forEach(d => {
+            globDiscSoma[d] = 0;
+            globDiscQtd[d] = 0;
+        });
+
+        currentData.forEach(t => {
+            globAlunos += t.pres;
+            globMatriculas += t.matrics;
             
-            let tCache = rankingGlobaisTurmas.filter(t => t.escola === escola);
-            tCache.forEach(t => {
-                e.pres += t.pres; 
-                e.matrics += t.matrics;
-                e.acertos += t.acertos; 
-                e.possiveis += t.possiveis;
-                discArray.forEach(d => { 
-                    e.disc[d].acertos += t.disc[d].acertos; 
-                    e.disc[d].possiveis += t.disc[d].possiveis; 
-                });
+            if (t.mediaGeral > -1) {
+                mediaGeralSoma += (t.mediaGeral * t.pres);
+                mediaGeralQtd += t.pres;
+            }
+
+            DISCIPLINAS_PADRAO.forEach(d => {
+                if (t.disc[d] > -1) {
+                    globDiscSoma[d] += (t.disc[d] * t.pres);
+                    globDiscQtd[d] += t.pres;
+                }
             });
-            
-            e.pctPart = e.matrics > 0 ? Math.min((e.pres / e.matrics) * 100, 100) : 100;
-            e.mediaGeral = e.possiveis > 0 ? (e.acertos / e.possiveis) * 100 : -1;
-            discArray.forEach(d => { 
-                if (e.disc[d].possiveis > 0) e.disc[d].pct = (e.disc[d].acertos / e.disc[d].possiveis) * 100; 
-            });
-            
-            rankingGlobaisEscolas.push(e);
+        });
+
+        let globDisc = {};
+        DISCIPLINAS_PADRAO.forEach(d => {
+            globDisc[d] = globDiscQtd[d] > 0 ? (globDiscSoma[d] / globDiscQtd[d]) : -1;
+        });
+
+        totaisGlobais = {
+            globAlunos,
+            globMatriculas,
+            globPart: globMatriculas > 0 ? Math.min((globAlunos / globMatriculas) * 100, 100) : 0,
+            globMedia: mediaGeralQtd > 0 ? (mediaGeralSoma / mediaGeralQtd) : -1,
+            globDisc
+        };
+
+        renderizarTabelaEGratico();
+    }
+
+    function sortArray() {
+        currentData.sort((a, b) => {
+            let valA, valB;
+            if (currentSortCol === 'nome') { valA = a.nome; valB = b.nome; }
+            else if (currentSortCol === 'pres') { valA = a.pres; valB = b.pres; }
+            else if (currentSortCol === 'mat') { valA = a.matrics; valB = b.matrics; }
+            else if (currentSortCol === 'part') { valA = a.pctPart; valB = b.pctPart; }
+            else if (currentSortCol === 'media') { valA = a.mediaGeral; valB = b.mediaGeral; }
+            else { valA = a.disc[currentSortCol]; valB = b.disc[currentSortCol]; }
+
+            if (valA === valB) return a.nome.localeCompare(b.nome);
+            if (typeof valA === 'string') return currentSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            if (valA === -1 || isNaN(valA)) return 1; 
+            if (valB === -1 || isNaN(valB)) return -1;
+            return currentSortDir === 'asc' ? valA - valB : valB - valA;
         });
     }
 
     function getRank(listaMestre, itemNome, valorProcurado, tipoBusca, field, anoSerieFiltro = null) {
-        if (valorProcurado === -1) return "-";
+        if (valorProcurado === -1 || isNaN(valorProcurado)) return "-";
         let validos = [];
-        
+
         listaMestre.forEach(item => {
             if (tipoBusca === 'turma' && anoSerieFiltro && item.anoSerie !== anoSerieFiltro) return;
 
             let v = -1;
             if (field === 'mediaGeral') v = item.mediaGeral;
             else if (field === 'pctPart') v = item.pctPart;
-            else {
-                const discObj = item.disc || item.escDisc;
-                if (discObj && discObj[field]) v = discObj[field].pct;
+            else if (item.disc && item.disc[field] !== undefined) v = item.disc[field];
+
+            if (v !== -1 && !isNaN(v)) {
+                validos.push({ nome: item.nome, val: v });
             }
-            
-            if (v !== -1) validos.push({ nome: (tipoBusca === 'escola' ? item.nome : item.turma), val: v });
         });
 
-        validos.sort((a,b) => b.val - a.val);
+        validos.sort((a, b) => b.val - a.val);
 
         let rank = 1;
         for (let i = 0; i < validos.length; i++) {
-            if (i > 0 && validos[i].val < validos[i-1].val) rank = i + 1;
+            if (i > 0 && validos[i].val < validos[i - 1].val) rank = i + 1;
             if (validos[i].nome === itemNome) return `${rank}/${validos.length}`;
         }
         return "-";
@@ -456,7 +574,7 @@
         } else {
             currentSortCol = coluna;
             currentSortDir = 'desc'; 
-            if(coluna === 'nome') currentSortDir = 'asc'; 
+            if (coluna === 'nome') currentSortDir = 'asc'; 
         }
         renderizarTabelaEGratico();
     }
@@ -473,114 +591,6 @@
         if (pct < 30) return "#dc2626"; 
         if (pct >= 50) return "#16a34a"; 
         return "#facc15"; 
-    }
-
-    function filtrarTurmas() {
-        let fEtapa = document.getElementById('etapaSelect').value;
-        let fTurno = document.getElementById('turnoSelect').value;
-
-        return rankingGlobaisTurmas.filter(t => {
-            if (fTurno !== 'TODOS' && t.turno !== fTurno) return false;
-            if (fEtapa === 'EFAF' && t.etapa !== 'EFAF') return false;
-            if (fEtapa === 'EM_TODOS' && !t.etapa.startsWith('EM')) return false;
-            if (fEtapa === 'EM_PROPEDEUTICO' && t.etapa !== 'EM_PROPEDEUTICO') return false;
-            if (fEtapa === 'EM_TECNICO' && t.etapa !== 'EM_TECNICO') return false;
-            return true;
-        });
-    }
-
-    function processarDadosGeral() {
-        const discArray = Array.from(disciplinasGlobais).sort();
-        currentData = [];
-        
-        let turmasFiltradas = filtrarTurmas();
-        let globAlunos = 0, globMatriculas = 0, globAcertos = 0, globPossiveis = 0;
-        let globDisc = {};
-        discArray.forEach(d => globDisc[d] = { acertos: 0, possiveis: 0 });
-
-        Object.keys(dadosEscolasCache).forEach(escola => {
-            let tCache = turmasFiltradas.filter(t => t.escola === escola);
-            if (tCache.length === 0) return; 
-
-            let e = { nome: escola, pres: 0, matrics: 0, acertos: 0, possiveis: 0, escDisc: {} };
-            discArray.forEach(d => e.escDisc[d] = { acertos: 0, possiveis: 0, pct: -1 });
-
-            tCache.forEach(t => {
-                e.pres += t.pres; 
-                e.matrics += t.matrics;
-                e.acertos += t.acertos; 
-                e.possiveis += t.possiveis;
-                discArray.forEach(d => { 
-                    e.escDisc[d].acertos += t.disc[d].acertos; 
-                    e.escDisc[d].possiveis += t.disc[d].possiveis; 
-                });
-            });
-
-            e.pctPart = e.matrics > 0 ? Math.min((e.pres / e.matrics) * 100, 100) : 100;
-            e.mediaGeral = e.possiveis > 0 ? (e.acertos / e.possiveis) * 100 : -1;
-            
-            discArray.forEach(d => { 
-                if (e.escDisc[d].possiveis > 0) e.escDisc[d].pct = (e.escDisc[d].acertos / e.escDisc[d].possiveis) * 100; 
-            });
-
-            currentData.push(e);
-            globAlunos += e.pres; globMatriculas += e.matrics; globAcertos += e.acertos; globPossiveis += e.possiveis;
-            discArray.forEach(d => { 
-                globDisc[d].acertos += e.escDisc[d].acertos; 
-                globDisc[d].possiveis += e.escDisc[d].possiveis; 
-            });
-        });
-
-        totaisGlobais = { globAlunos, globMatriculas, globAcertos, globPossiveis, globDisc, discArray };
-        renderizarTabelaEGratico();
-    }
-
-    function processarDadosEscola() {
-        const nomeEscola = document.getElementById('escolaSelect').value;
-        if (!nomeEscola) return;
-        
-        const discArray = Array.from(disciplinasGlobais).sort();
-        let turmasFiltradas = filtrarTurmas();
-        
-        currentData = turmasFiltradas.filter(t => t.escola === nomeEscola);
-        
-        let globAlunos = 0, globMatriculas = 0, globAcertos = 0, globPossiveis = 0;
-        let globDisc = {};
-        discArray.forEach(d => globDisc[d] = { acertos: 0, possiveis: 0 });
-
-        currentData.forEach(t => {
-            globAlunos += t.pres; 
-            globMatriculas += t.matrics; 
-            globAcertos += t.acertos; 
-            globPossiveis += t.possiveis;
-            discArray.forEach(d => { 
-                globDisc[d].acertos += t.disc[d].acertos; 
-                globDisc[d].possiveis += t.disc[d].possiveis; 
-            });
-            
-            t.nome = t.turma; 
-            t.escDisc = t.disc; 
-        });
-
-        totaisGlobais = { globAlunos, globMatriculas, globAcertos, globPossiveis, globDisc, discArray };
-        renderizarTabelaEGratico();
-    }
-
-    function sortArray() {
-        currentData.sort((a, b) => {
-            let valA, valB;
-            if (currentSortCol === 'nome') { valA = a.nome; valB = b.nome; }
-            else if (currentSortCol === 'pres') { valA = a.pres; valB = b.pres; }
-            else if (currentSortCol === 'mat') { valA = a.matrics; valB = b.matrics; }
-            else if (currentSortCol === 'part') { valA = a.pctPart; valB = b.pctPart; }
-            else if (currentSortCol === 'media') { valA = a.mediaGeral; valB = b.mediaGeral; }
-            else { valA = a.escDisc[currentSortCol].pct; valB = b.escDisc[currentSortCol].pct; }
-
-            if (valA === valB) return a.nome.localeCompare(b.nome);
-            if (typeof valA === 'string') return currentSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-            if (valA === -1) return 1; if (valB === -1) return -1;
-            return currentSortDir === 'asc' ? valA - valB : valB - valA;
-        });
     }
 
     function renderHeaderCell(key, label, width = "auto") {
@@ -600,74 +610,73 @@
 
     function renderizarTabelaEGratico() {
         sortArray();
-        const dArr = totaisGlobais.discArray;
         const totalRegistros = currentData.length;
         let htmlRows = "";
         let labels = [], dataPcts = [], bgColors = [];
 
         let clas = 0, pClas = 0;
-        let listaEscolasFiltradasParaRank = modoAtual === 'GERAL' ? currentData : [];
+        let turmasFiltradas = filtrarTurmas();
 
         currentData.forEach((e, index) => {
             clas = index + 1;
             if (index > 0 && currentSortCol !== 'nome') {
-                let cVal, pValObj;
                 let prevObj = currentData[index - 1];
-                if (currentSortCol === 'pres') { cVal = e.pres; pValObj = prevObj.pres; }
-                else if (currentSortCol === 'mat') { cVal = e.matrics; pValObj = prevObj.matrics; }
-                else if (currentSortCol === 'part') { cVal = e.pctPart; pValObj = prevObj.pctPart; }
-                else if (currentSortCol === 'media') { cVal = e.mediaGeral; pValObj = prevObj.mediaGeral; }
-                else { cVal = e.escDisc[currentSortCol].pct; pValObj = prevObj.escDisc[currentSortCol].pct; }
-                if (cVal === pValObj) clas = pClas; else pClas = clas; 
+                let cVal = currentSortCol === 'pres' ? e.pres :
+                           currentSortCol === 'mat' ? e.matrics :
+                           currentSortCol === 'part' ? e.pctPart :
+                           currentSortCol === 'media' ? e.mediaGeral : e.disc[currentSortCol];
+                let pVal = currentSortCol === 'pres' ? prevObj.pres :
+                           currentSortCol === 'mat' ? prevObj.matrics :
+                           currentSortCol === 'part' ? prevObj.pctPart :
+                           currentSortCol === 'media' ? prevObj.mediaGeral : prevObj.disc[currentSortCol];
+                if (cVal === pVal) clas = pClas; else pClas = clas;
             } else { pClas = clas; }
 
             let anoSerieFiltro = modoAtual === 'GERAL' ? null : e.anoSerie;
-            let listaParaRankUre = modoAtual === 'GERAL' ? listaEscolasFiltradasParaRank : filtrarTurmas();
+            let listaUre = modoAtual === 'GERAL' ? currentData : turmasFiltradas;
+            let listaUe = modoAtual === 'GERAL' ? [] : currentData;
 
-            let rUrePart = getRank(listaParaRankUre, e.nome, e.pctPart, modoAtual === 'GERAL' ? 'escola' : 'turma', 'pctPart', anoSerieFiltro);
-            let rUePart = modoAtual === 'GERAL' ? "" : getRank(currentData, e.nome, e.pctPart, 'turma', 'pctPart', anoSerieFiltro);
-            
-            let partPctStr = e.pctPart.toFixed(1).replace('.',',') + "%";
-            let partHtml = generateCellHTML(partPctStr, rUrePart, rUePart, "cell-blue");
+            let rUrePart = getRank(listaUre, e.nome, e.pctPart, modoAtual === 'GERAL' ? 'escola' : 'turma', 'pctPart', anoSerieFiltro);
+            let rUePart = modoAtual === 'GERAL' ? "" : getRank(listaUe, e.nome, e.pctPart, 'turma', 'pctPart', anoSerieFiltro);
+            let partPctStr = e.pctPart > -1 ? e.pctPart.toFixed(1).replace('.', ',') + "%" : "-";
 
             htmlRows += `<tr>
                 <td class="col-clas">${currentSortCol === 'nome' ? clas : clas + 'º'}</td>
-                <td class="col-text">${e.nome}</td>
+                <td class="col-text" title="${e.nome}">${e.nome}</td>
                 <td>${e.pres}</td>
                 <td>${e.matrics}</td>
-                ${partHtml}`;
+                ${generateCellHTML(partPctStr, rUrePart, rUePart, "cell-blue")}`;
 
-            dArr.forEach(d => {
-                const pct = e.escDisc[d].pct;
-                let pctStr = pct === -1 ? "-" : pct.toFixed(1).replace('.',',')+"%";
-                let rUre = getRank(listaParaRankUre, e.nome, pct, modoAtual === 'GERAL' ? 'escola' : 'turma', d, anoSerieFiltro);
-                let rUe = modoAtual === 'GERAL' ? "" : getRank(currentData, e.nome, pct, 'turma', d, anoSerieFiltro);
+            DISCIPLINAS_PADRAO.forEach(d => {
+                const pct = e.disc[d];
+                let pctStr = (pct === -1 || isNaN(pct)) ? "-" : pct.toFixed(1).replace('.', ',') + "%";
+                let rUre = getRank(listaUre, e.nome, pct, modoAtual === 'GERAL' ? 'escola' : 'turma', d, anoSerieFiltro);
+                let rUe = modoAtual === 'GERAL' ? "" : getRank(listaUe, e.nome, pct, 'turma', d, anoSerieFiltro);
                 htmlRows += generateCellHTML(pctStr, rUre, rUe, getSemaforoClass(pct));
             });
 
-            let mgStr = e.mediaGeral === -1 ? "-" : e.mediaGeral.toFixed(1).replace('.',',')+"%";
-            let rUreMg = getRank(listaParaRankUre, e.nome, e.mediaGeral, modoAtual === 'GERAL' ? 'escola' : 'turma', 'mediaGeral', anoSerieFiltro);
-            let rUeMg = modoAtual === 'GERAL' ? "" : getRank(currentData, e.nome, e.mediaGeral, 'turma', 'mediaGeral', anoSerieFiltro);
-            
+            let mgStr = (e.mediaGeral === -1 || isNaN(e.mediaGeral)) ? "-" : e.mediaGeral.toFixed(1).replace('.', ',') + "%";
+            let rUreMg = getRank(listaUre, e.nome, e.mediaGeral, modoAtual === 'GERAL' ? 'escola' : 'turma', 'mediaGeral', anoSerieFiltro);
+            let rUeMg = modoAtual === 'GERAL' ? "" : getRank(listaUe, e.nome, e.mediaGeral, 'turma', 'mediaGeral', anoSerieFiltro);
             htmlRows += generateCellHTML(mgStr, rUreMg, rUeMg, "col-total " + getSemaforoClass(e.mediaGeral));
+
             htmlRows += `</tr>`;
-            
-            labels.push(modoAtual === 'GERAL' ? e.nome.split(' ').slice(0,2).join(' ') : e.nome.replace(/(INTEGRAL|MANHA|TARDE|NOITE|ANUAL|T1|T2|7H|9H|\-|\d{8,})/g, '').trim().substring(0,14));
-            
+
+            let labelCurto = modoAtual === 'GERAL' ? e.nome.split(' ').slice(0, 2).join(' ') : e.nome.replace(/(INTEGRAL|MANHA|TARDE|NOITE|ANUAL|T1|T2|7H|9H|\-|\d{8,})/g, '').trim().substring(0, 15);
+            labels.push(labelCurto);
+
             let chartVal = 0;
-            if (disciplinasGlobais.has(currentSortCol)) chartVal = e.escDisc[currentSortCol].pct > -1 ? e.escDisc[currentSortCol].pct.toFixed(1) : 0;
-            else if (currentSortCol === 'part') chartVal = e.pctPart.toFixed(1);
-            else chartVal = e.mediaGeral > -1 ? e.mediaGeral.toFixed(1) : 0;
+            if (currentSortCol === 'part') chartVal = e.pctPart > -1 ? e.pctPart.toFixed(1) : 0;
+            else if (currentSortCol === 'media') chartVal = e.mediaGeral > -1 ? e.mediaGeral.toFixed(1) : 0;
+            else chartVal = e.disc[currentSortCol] > -1 ? e.disc[currentSortCol].toFixed(1) : 0;
             dataPcts.push(chartVal);
-            
-            let colorVal = e.mediaGeral;
-            if (disciplinasGlobais.has(currentSortCol)) colorVal = e.escDisc[currentSortCol].pct;
-            else if (currentSortCol === 'part') colorVal = e.pctPart >= 95 ? 100 : (e.pctPart < 80 ? 0 : 40); 
+
+            let colorVal = currentSortCol === 'part' ? (e.pctPart >= 95 ? 100 : (e.pctPart < 80 ? 0 : 40)) :
+                           currentSortCol === 'media' ? e.mediaGeral : e.disc[currentSortCol];
             bgColors.push(getChartColor(colorVal));
         });
 
         const labelMain = modoAtual === 'GERAL' ? 'Escola' : 'Turma/Sala';
-        
         let headerHtml = `<table class="data-table"><thead><tr>
             <th class="col-clas" title="Classificação">Clas.<br>/${totalRegistros}</th>
             ${renderHeaderCell('nome', labelMain, '200px')}
@@ -675,28 +684,26 @@
             ${renderHeaderCell('mat', 'Total<br>Matric.')}
             ${renderHeaderCell('part', 'Part.<br>(%)')}
         `;
-        dArr.forEach(d => headerHtml += renderHeaderCell(d, d));
+        DISCIPLINAS_PADRAO.forEach(d => headerHtml += renderHeaderCell(d, d));
         headerHtml += `${renderHeaderCell('media', 'Média<br>Geral')}</tr></thead><tbody>`;
 
         const tg = totaisGlobais;
-        let tPart = tg.globMatriculas > 0 ? Math.min((tg.globAlunos / tg.globMatriculas) * 100, 100) : 0;
-        let tMedia = tg.globPossiveis > 0 ? (tg.globAcertos / tg.globPossiveis) * 100 : -1;
-        
         let totalRow = `<tr class="row-total">
             <td colspan="2" class="col-text">MÉDIA GLOBAL DOS FILTROS ATUAIS</td>
-            <td>${tg.globAlunos}</td><td>${tg.globMatriculas}</td><td class="cell-blue">${tPart.toFixed(1).replace('.',',')}%</td>`;
-        
-        dArr.forEach(d => {
-            const pct = tg.globDisc[d].possiveis > 0 ? (tg.globDisc[d].acertos / tg.globDisc[d].possiveis) * 100 : -1;
-            totalRow += `<td class="${getSemaforoClass(pct)}">${pct === -1 ? "-" : pct.toFixed(1).replace('.',',')+"%"}</td>`;
+            <td>${tg.globAlunos || 0}</td>
+            <td>${tg.globMatriculas || 0}</td>
+            <td class="cell-blue">${tg.globPart ? tg.globPart.toFixed(1).replace('.', ',') + '%' : '0%'}</td>`;
+
+        DISCIPLINAS_PADRAO.forEach(d => {
+            const pct = tg.globDisc ? tg.globDisc[d] : -1;
+            totalRow += `<td class="${getSemaforoClass(pct)}">${pct === -1 || isNaN(pct) ? "-" : pct.toFixed(1).replace('.', ',') + "%"}</td>`;
         });
-        totalRow += `<td class="col-total ${getSemaforoClass(tMedia)}">${tMedia === -1 ? "-" : tMedia.toFixed(1).replace('.',',')+"%"}</td></tr>`;
+        totalRow += `<td class="col-total ${getSemaforoClass(tg.globMedia)}">${tg.globMedia === -1 || isNaN(tg.globMedia) ? "-" : tg.globMedia.toFixed(1).replace('.', ',') + "%"}</td></tr>`;
 
         document.getElementById('tabelaArea').innerHTML = headerHtml + totalRow + htmlRows + `</tbody></table>`;
-        
-        let chartTitle = "Média Geral (%)";
-        if (disciplinasGlobais.has(currentSortCol)) chartTitle = `Desempenho em ${currentSortCol} (%)`;
-        else if (currentSortCol === 'part') chartTitle = "Taxa de Participação (%)";
+
+        let chartTitle = currentSortCol === 'part' ? "Taxa de Participação (%)" :
+                         currentSortCol === 'media' ? "Média Geral (%)" : `Desempenho em ${currentSortCol} (%)`;
         if (modoAtual === 'ESCOLA') chartTitle += ` - ${document.getElementById('escolaSelect').value}`;
 
         desenharGrafico(labels, dataPcts, bgColors, chartTitle);
@@ -717,7 +724,8 @@
                 ]
             },
             options: {
-                responsive: true, maintainAspectRatio: false,
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: { 
                     y: { beginAtZero: true, max: 100, title: { display: true, text: 'Porcentagem (%)' } },
                     x: { ticks: { font: { size: 10 } } }
