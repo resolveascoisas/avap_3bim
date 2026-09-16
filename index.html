@@ -93,7 +93,7 @@
 <div id="loadingOverlay">
     <div class="spinner" id="loadingSpinner"></div>
     <div id="loadingText">Sincronizando Base de Dados (3º Bimestre)...</div>
-    <div id="loadingSubtext" style="font-size: 13px; font-weight: 400; color: var(--secondary); margin-top: 10px; max-width: 600px;">Aguarde, processando planilhas da URE Avaré.</div>
+    <div id="loadingSubtext" style="font-size: 13px; font-weight: 400; color: var(--secondary); margin-top: 10px; max-width: 600px;">Aguarde, conectando com as escolas da URE Avaré.</div>
 </div>
 
 <div class="dashboard-container">
@@ -147,32 +147,32 @@
 
 <script>
     const CONFIG = {
-        // Nomes exatos dos arquivos XLSX na pasta dados/ (com ou sem código de escola)
-        ARQUIVOS: [
-            "ABILIO RAPOSO FERRAZ JUNIOR - 24545",
-            "ASSENTAMENTO ZUMBI DOS PALMARES - 923983",
-            "AVELINO APARECIDO RIBEIRO DOUTOR - 24697",
-            "BENE ANDRADE DONA - 24533",
-            "CELSO FERREIRA DA SILVA PROFESSOR - 920519",
-            "COTA LEONEL DONA - 24654",
-            "DIMAS MOZART E SILVA PROFESSOR - 906230",
-            "EMILIO IMMOOS PADRE - 24624",
-            "ERUCE PAULUCCI PROFESSOR - 24582",
-            "GUIDO DIAS DE ALMEIDA PROFESSOR - 910119",
-            "JOAO CRUZ CORONEL - 24514",
-            "JOAO MICHELIN - 24703",
-            "JOAO TEIXEIRA DE ARAUJO PROFESSOR - 24648",
-            "JOSE APARECIDO CASTELUCCI PROFESSOR - 24673",
-            "JOSE LEITE PINHEIRO PROFESSOR - 24600",
-            "JOSE PENNA - 24612",
-            "JOSE PIRES DE CARVALHO DOUTOR - 24715",
-            "MARIA IZABEL CRUZ PIMENTEL DONA - 24521",
-            "MATILDE VIEIRA - 24508",
-            "PAULO ARAUJO NOVAES DOUTOR - 24557",
-            "PAULO DELICIO - 24727",
-            "PEDRO BENTO ALVES - 24661",
-            "PROFESSORA MARIANA APARECIDA TODESCATO - 924847",
-            "SANDRA APARECIDA DE ARAUJO PROFESSORA - 44671"
+        // Nomes exatos das escolas que dão nome aos arquivos .xlsx dentro de dados/
+        ESCOLAS: [
+            "ABILIO RAPOSO FERRAZ JUNIOR",
+            "ASSENTAMENTO ZUMBI DOS PALMARES",
+            "AVELINO APARECIDO RIBEIRO DOUTOR",
+            "BENE ANDRADE DONA",
+            "CELSO FERREIRA DA SILVA PROFESSOR",
+            "COTA LEONEL DONA",
+            "DIMAS MOZART E SILVA PROFESSOR",
+            "EMILIO IMMOOS PADRE",
+            "ERUCE PAULUCCI PROFESSOR",
+            "GUIDO DIAS DE ALMEIDA PROFESSOR",
+            "JOAO CRUZ CORONEL",
+            "JOAO MICHELIN",
+            "JOAO TEIXEIRA DE ARAUJO PROFESSOR",
+            "JOSE APARECIDO CASTELUCCI PROFESSOR",
+            "JOSE LEITE PINHEIRO PROFESSOR",
+            "JOSE PENNA",
+            "JOSE PIRES DE CARVALHO DOUTOR",
+            "MARIA IZABEL CRUZ PIMENTEL DONA",
+            "MATILDE VIEIRA",
+            "PAULO ARAUJO NOVAES DOUTOR",
+            "PAULO DELICIO",
+            "PEDRO BENTO ALVES",
+            "PROFESSORA MARIANA APARECIDA TODESCATO",
+            "SANDRA APARECIDA DE ARAUJO PROFESSORA"
         ]
     };
 
@@ -189,15 +189,11 @@
     let currentData = [];         
     let totaisGlobais = {}; 
 
-    function extrairNomeEscola(nomeArquivo) {
-        return nomeArquivo.replace(/\s*-\s*\d+$/, '').trim();
-    }
-
     window.onload = async () => {
         if (window.location.protocol === 'file:') {
             document.getElementById('loadingSpinner').style.display = 'none';
             document.getElementById('loadingText').innerText = "Acesso Local Bloqueado pelo Navegador";
-            document.getElementById('loadingSubtext').innerHTML = "<span style='color:#dc2626; font-weight:bold;'>Erro:</span> Você abriu o arquivo index.html dando dois cliques no computador.<br>Para o painel rodar com segurança, suba para o GitHub Pages ou execute em um Servidor Local (Live Server / Python http.server).";
+            document.getElementById('loadingSubtext').innerHTML = "<span style='color:#dc2626; font-weight:bold;'>Erro:</span> Você abriu o arquivo index.html dando dois cliques no computador.<br>Para o painel rodar com segurança, você <b>precisa subir esta pasta para o GitHub Pages</b> ou usar um Servidor Local (Live Server / Python).";
             return;
         }
 
@@ -207,16 +203,18 @@
 
             const select = document.getElementById('escolaSelect');
             select.innerHTML = "";
-            Object.keys(dadosEscolasCache).sort().forEach(nome => {
-                select.innerHTML += `<option value="${nome}">${nome}</option>`;
+            CONFIG.ESCOLAS.forEach(nome => {
+                if (dadosEscolasCache[nome]) {
+                    select.innerHTML += `<option value="${nome}">${nome}</option>`;
+                }
             });
 
             document.getElementById('loadingOverlay').style.display = 'none';
             setModo('GERAL');
         } catch (e) {
             document.getElementById('loadingSpinner').style.display = 'none';
-            document.getElementById('loadingText').innerText = "Erro ao carregar dados";
-            document.getElementById('loadingSubtext').innerText = "Verifique se a pasta 'dados/' contém as planilhas das escolas com os nomes correspondentes à lista CONFIG.ARQUIVOS.";
+            document.getElementById('loadingText').innerText = "Erro Crítico ao carregar dados";
+            document.getElementById('loadingSubtext').innerText = "Abra o console (F12) para ver detalhes. Certifique-se de que os nomes dos arquivos Excel na pasta dados/ batem com a lista.";
             console.error(e);
         }
     };
@@ -227,6 +225,7 @@
         return await resp.arrayBuffer();
     }
 
+    // Calcula quantidade de questões pela string do cabeçalho (ex: "(Questões 1, 2, 3, 4)" -> 4)
     function calcularQtdQuestoes(headerString) {
         const match = headerString.match(/\((Questões.*?)\)/i);
         if (match) {
@@ -237,26 +236,25 @@
     }
 
     async function carregarTodasPlanilhasExcel() {
-        for (let i = 0; i < CONFIG.ARQUIVOS.length; i++) {
-            const arquivoNome = CONFIG.ARQUIVOS[i];
-            const nomeExibicao = extrairNomeEscola(arquivoNome);
-            const url = `dados/${arquivoNome}.xlsx`;
-            
-            document.getElementById('loadingSubtext').innerText = `Processando: ${nomeExibicao} (${i + 1}/${CONFIG.ARQUIVOS.length})`;
+        for (let i = 0; i < CONFIG.ESCOLAS.length; i++) {
+            const nomeEscola = CONFIG.ESCOLAS[i];
+            const url = `dados/${nomeEscola}.xlsx`;
+            document.getElementById('loadingSubtext').innerText = `Processando: ${nomeEscola} (${i + 1}/${CONFIG.ESCOLAS.length})`;
             
             try {
                 let buffer;
                 try {
                     buffer = await fetchAsArrayBuffer(url);
-                } catch (errFallback) {
-                    // Fallback caso o arquivo esteja salvo sem o código CIE
-                    buffer = await fetchAsArrayBuffer(`dados/${nomeExibicao}.xlsx`);
+                } catch (err) {
+                    // Fallback caso algum arquivo venha com espaço extra ou extensão minúscula
+                    buffer = await fetchAsArrayBuffer(`dados/${nomeEscola.trim()}.xlsx`);
                 }
 
                 const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
                 let turmasData = [];
                 
                 workbook.SheetNames.forEach(sheetName => {
+                    // Ignora aba automática de resumo se houver
                     if (sheetName.toLowerCase().includes('resultado')) return;
                     
                     const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
@@ -277,9 +275,9 @@
                     });
                 });
                 
-                if (turmasData.length > 0) dadosEscolasCache[nomeExibicao] = turmasData;
+                if (turmasData.length > 0) dadosEscolasCache[nomeEscola] = turmasData;
             } catch(e) { 
-                console.warn(`Planilha não encontrada para: ${nomeExibicao}`, e); 
+                console.warn(`Aviso: Planilha de "${nomeEscola}" não encontrada em dados/${nomeEscola}.xlsx`); 
             }
         }
     }
@@ -314,6 +312,7 @@
                 const keys = Object.keys(row);
                 const tNome = String(row[keys[0]]).toUpperCase().trim();
                 
+                // Pega alunos presentes e matrículas diretamente da planilha
                 let keyPres = keys.find(k => k.toLowerCase().includes("fizeram") || k.toLowerCase().includes("pres"));
                 let keyMat = keys.find(k => k.toLowerCase().includes("matrícula") || k.toLowerCase().includes("matricula") || k.toLowerCase().includes("total de alunos"));
                 
@@ -357,6 +356,7 @@
                 });
             });
 
+            // Conclui turmas da escola
             Object.keys(turmasMap).forEach(tNome => {
                 let t = turmasMap[tNome];
                 t.pctPart = t.matrics > 0 ? Math.min((t.pres / t.matrics) * 100, 100) : 100;
@@ -369,6 +369,7 @@
             });
         });
 
+        // Consolida visão geral das escolas
         Object.keys(dadosEscolasCache).forEach(escola => {
             let e = { nome: escola, pres: 0, matrics: 0, acertos: 0, possiveis: 0, disc: {} };
             discArray.forEach(d => e.disc[d] = { acertos: 0, possiveis: 0, pct: -1 });
