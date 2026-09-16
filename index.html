@@ -146,7 +146,6 @@
 </div>
 
 <script>
-    // Lista exata com os nomes dos arquivos na pasta dados/
     const ARQUIVOS_REDE = [
         "ABILIO RAPOSO FERRAZ JUNIOR - 903188.xlsx",
         "ASSENTAMENTO ZUMBI DOS PALMARES - 566032.xlsx",
@@ -198,7 +197,7 @@
         if (window.location.protocol === 'file:') {
             document.getElementById('loadingSpinner').style.display = 'none';
             document.getElementById('loadingText').innerText = "Acesso Local Bloqueado pelo Navegador";
-            document.getElementById('loadingSubtext').innerHTML = "<span style='color:#dc2626; font-weight:bold;'>Erro:</span> Arquivo aberto por duplo-clique.<br>Suba para o GitHub Pages ou abra com um servidor local (Live Server no VS Code).";
+            document.getElementById('loadingSubtext').innerHTML = "<span style='color:#dc2626; font-weight:bold;'>Erro:</span> Arquivo aberto por duplo-clique.<br>Execute pelo Live Server no VS Code ou suba para o GitHub Pages.";
             return;
         }
 
@@ -243,6 +242,15 @@
         return num <= 1.0 && num > 0 ? num * 100 : num;
     }
 
+    function calcularQtdQuestoes(headerString) {
+        const match = headerString.match(/\(Questões\s*(.*?)\)/i);
+        if (match) {
+            const numeros = match[1].match(/\d+/g);
+            return numeros ? numeros.length : 4;
+        }
+        return 4;
+    }
+
     function classificarEtapa(turma) {
         let t = turma.toUpperCase();
         if (t.includes('ANO')) return 'EFAF';
@@ -268,12 +276,13 @@
         for (let i = 0; i < ARQUIVOS_REDE.length; i++) {
             const nomeArquivo = ARQUIVOS_REDE[i];
             const nomeEscola = extrairNomeEscola(nomeArquivo);
-            document.getElementById('loadingSubtext').innerText = `Processando: ${nomeEscola} (${i + 1}/${ARQUIVOS_REDE.length})`;
+            document.getElementById('loadingSubtext').innerText = `Lendo (${i + 1}/${ARQUIVOS_REDE.length}): ${nomeEscola}`;
 
             let buffer = null;
             const tentativas = [
                 `dados/${nomeArquivo}`,
-                `dados/${nomeEscola}.xlsx`
+                `dados/${nomeEscola}.xlsx`,
+                `dados/${nomeEscola} - ${nomeArquivo.match(/\d+/)?.[0] || ''}.xlsx`
             ];
 
             for (let url of tentativas) {
@@ -284,20 +293,20 @@
             }
 
             if (!buffer) {
-                console.warn(`Arquivo não encontrado para: ${nomeArquivo}`);
+                console.warn(`Arquivo não encontrado em dados/: ${nomeArquivo}`);
                 continue;
             }
 
             try {
                 const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+                let turmasEscola = [];
                 
-                // Prioridade: Aba 'Resultado automático' já compilada
+                // 1º Caso: Planilha que já possui a aba "Resultado automático"
                 const abaResultadoNome = workbook.SheetNames.find(s => s.toLowerCase().includes('resultado'));
                 
                 if (abaResultadoNome) {
                     const sheet = workbook.Sheets[abaResultadoNome];
                     const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-                    let turmasEscola = [];
 
                     rows.forEach(r => {
                         const keys = Object.keys(r);
@@ -336,13 +345,93 @@
                         turmasEscola.push(turmaObj);
                         turmasGlobais.push(turmaObj);
                     });
+                } else {
+                    // 2º Caso: Planilhas brutas (sem Resultado automático), lendo todas as abas de turma
+                    workbook.SheetNames.forEach(sheetName => {
+                        const sheet = workbook.Sheets[sheetName];
+                        const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+                        if (rows.length === 0) return;
 
-                    if (turmasEscola.length > 0) {
-                        dadosEscolasCache[nomeEscola] = turmasEscola;
-                    }
+                        const classCol = Object.keys(rows[0])[0];
+
+                        rows.forEach(r => {
+                            let tNome = String(r[classCol]).trim();
+                            if (!tNome || tNome.toUpperCase().includes("MÉDIA GLOBAL") || tNome.toUpperCase().includes("TOTAL")) return;
+
+                            const keys = Object.keys(r);
+                            let keyPres = keys.find(k => k.toLowerCase().includes("fizeram") || k.toLowerCase().includes("pres"));
+                            let keyMat = keys.find(k => k.toLowerCase().includes("matrícula") || k.toLowerCase().includes("matricula") || k.toLowerCase().includes("total de alunos"));
+
+                            let pres = parseInt(r[keyPres]) || 0;
+                            let mat = parseInt(r[keyMat]) || pres;
+                            let pctPart = mat > 0 ? (pres / mat) * 100 : 100;
+
+                            let disc = {};
+                            DISCIPLINAS_PADRAO.forEach(d => disc[d] = -1);
+
+                            let discSomaPct = 0;
+                            let discQtd = 0;
+
+                            keys.forEach(h => {
+                                if (h.includes("Acertos em")) {
+                                    const match = h.match(/Acertos em (.*?)\s*\(/);
+                                    if (match) {
+                                        const dNome = match[1].trim();
+                                        const valStr = r[h];
+                                        if (valStr !== "" && valStr !== "-") {
+                                            const acertos = parseInt(valStr) || 0;
+                                            const questoes = calcularQtdQuestoes(h);
+                                            const possiveis = pres * questoes;
+                                            const pct = possiveis > 0 ? (acertos / possiveis) * 100 : 0;
+
+                                            // Suporte a Filosofia/Sociologia unificado
+                                            if (dNome.toLowerCase().includes("filosofia") || dNome.toLowerCase().includes("sociologia")) {
+                                                disc["Filosofia"] = pct;
+                                                disc["Sociologia"] = pct;
+                                                discSomaPct += pct;
+                                                discQtd++;
+                                            } else {
+                                                // Mapeia nas disciplinas padrão
+                                                let dPadrao = DISCIPLINAS_PADRAO.find(dp => dp.toLowerCase() === dNome.toLowerCase());
+                                                if (dPadrao) {
+                                                    disc[dPadrao] = pct;
+                                                    discSomaPct += pct;
+                                                    discQtd++;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+
+                            let mediaGeral = discQtd > 0 ? (discSomaPct / discQtd) : -1;
+
+                            let turmaObj = {
+                                escola: nomeEscola,
+                                turma: tNome,
+                                nome: tNome,
+                                anoSerie: extrairAnoSerie(tNome),
+                                turno: tNome.toUpperCase().includes('INTEGRAL') ? 'INTEGRAL' : 'PARCIAL',
+                                etapa: classificarEtapa(tNome),
+                                pres: pres,
+                                matrics: mat,
+                                pctPart: pctPart,
+                                mediaGeral: mediaGeral,
+                                disc: disc
+                            };
+
+                            turmasEscola.push(turmaObj);
+                            turmasGlobais.push(turmaObj);
+                        });
+                    });
+                }
+
+                if (turmasEscola.length > 0) {
+                    dadosEscolasCache[nomeEscola] = turmasEscola;
+                    console.log(`✓ ${nomeEscola}: ${turmasEscola.length} turmas carregadas.`);
                 }
             } catch (errParse) {
-                console.warn(`Erro ao interpretar planilha de ${nomeEscola}:`, errParse);
+                console.error(`Erro ao processar ${nomeEscola}:`, errParse);
             }
         }
     }
